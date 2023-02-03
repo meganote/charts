@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spark-history-server
+  namespace: meganote
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: spark-history-server
+  template:
+    metadata:
+      labels:
+        app: spark-history-server
+    spec:
+      containers:
+        - name: spark-history-server
+          image: glue/sparkui:v4.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 18080
+              protocol: TCP
+          command: ["/opt/spark/bin/spark-class"]
+          args: ["org.apache.spark.deploy.history.HistoryServer"]
+          env:
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: minio
+                  key: rootUser
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: minio
+                  key: rootPassword
+            - name: SPARK_HISTORY_OPTS
+              value: -Dspark.history.fs.logDirectory=s3a://spark/eventLog -Dspark.hadoop.fs.s3a.endpoint=http://minio.meganote.svc:9000 -Dspark.hadoop.fs.s3a.path.style.access=true
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: spark-history-server
+  namespace: meganote
+spec:
+  type: ClusterIP
+  ports:
+    - port: 18080
+      protocol: TCP
+      targetPort: 18080
+  selector:
+    app: spark-history-server
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: spark-history-server
+  namespace: meganote
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/secure-backends: "false"
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: spark-history.matrix.local
+      http:
+        paths:
+          - pathType: Prefix
+            backend:
+              service:
+                name: spark-history-server
+                port:
+                  number: 18080
+            path: /

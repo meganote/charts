@@ -1,0 +1,50 @@
+mode:
+  standalone
+
+existingSecret: "minio"
+
+replicas: 1
+
+persistence:
+  enabled: true
+  existingClaim: "minio"
+
+resources:
+  requests:
+    memory: 128m
+
+ingress:
+  enabled: true
+  ingressClassName: "nginx"
+  labels: {}
+    # node-role.kubernetes.io/ingress: platform
+
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    # kubernetes.io/tls-acme: "true"
+    # kubernetes.io/ingress.allow-http: "false"
+    # kubernetes.io/ingress.global-static-ip-name: ""
+    nginx.ingress.kubernetes.io/secure-backends: "false"
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+    # nginx.ingress.kubernetes.io/whitelist-source-range: 0.0.0.0/0
+  path: /
+  hosts:
+    - minio.matrix.local
+
+consoleIngress:
+  enabled: true
+  ingressClassName: "nginx"
+  labels: {}
+  # node-role.kubernetes.io/ingress: platform
+
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    # kubernetes.io/tls-acme: "true"
+    # kubernetes.io/ingress.allow-http: "false"
+    # kubernetes.io/ingress.global-static-ip-name: ""
+    nginx.ingress.kubernetes.io/secure-backends: "false"
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+    # nginx.ingress.kubernetes.io/whitelist-source-range: 0.0.0.0/0
+  path: /
+  hosts:
+    - minio-console.matrix.local

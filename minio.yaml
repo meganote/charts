@@ -1,0 +1,28 @@
+kind: Secret
+apiVersion: v1
+metadata:
+  name: minio
+  namespace: meganote
+  labels:
+    app: minio
+  annotations:
+    meta.helm.sh/release-name: minio
+    meta.helm.sh/release-namespace: minio
+data:
+  rootUser: OGI2MjJl
+  rootPassword: YTNlN2Q4OGQ0ZmE4
+type: Opaque
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: minio
+  namespace: meganote
+spec:
+  storageClassName: ""
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 100Gi
+  volumeName: "pvc-desktop-host-d-data"

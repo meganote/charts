@@ -1,9 +1,8 @@
-mode:
-  standalone
-
-existingSecret: "minio"
+mode: standalone
 
 replicas: 1
+
+existingSecret: "console-admin"
 
 persistence:
   enabled: true
@@ -13,20 +12,35 @@ resources:
   requests:
     memory: 128m
 
+buckets:
+ - name: datasets
+   policy: public
+   purge: false
+ - name: codes
+   policy: public
+   purge: false
+ - name: spark/eventLog
+   policy: public
+   purge: false
+ - name: spark/livyStore
+   policy: public
+   purge: false
+
+users:
+  ## Username, password and policy to be assigned to the user
+  ## Default policies are [readonly|readwrite|writeonly|consoleAdmin|diagnostics]
+  ## Add new policies as explained here https://docs.min.io/docs/minio-multi-user-quickstart-guide.html
+  ## NOTE: this will fail if LDAP is enabled in your MinIO deployment
+  ## make sure to disable this if you are using LDAP.
+  - accessKey: 5YYBUCEKZ44XXNCI
+    secretKey: DCCZ5ZHI6NREYTAG
+    policy: readwrite
+
 ingress:
   enabled: true
   ingressClassName: "nginx"
   labels: {}
-    # node-role.kubernetes.io/ingress: platform
-
-  annotations:
-    nginx.ingress.kubernetes.io/ssl-redirect: "false"
-    # kubernetes.io/tls-acme: "true"
-    # kubernetes.io/ingress.allow-http: "false"
-    # kubernetes.io/ingress.global-static-ip-name: ""
-    nginx.ingress.kubernetes.io/secure-backends: "false"
-    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
-    # nginx.ingress.kubernetes.io/whitelist-source-range: 0.0.0.0/0
+  # node-role.kubernetes.io/ingress: platform
   path: /
   hosts:
     - minio.matrix.local
@@ -36,15 +50,6 @@ consoleIngress:
   ingressClassName: "nginx"
   labels: {}
   # node-role.kubernetes.io/ingress: platform
-
-  annotations:
-    nginx.ingress.kubernetes.io/ssl-redirect: "false"
-    # kubernetes.io/tls-acme: "true"
-    # kubernetes.io/ingress.allow-http: "false"
-    # kubernetes.io/ingress.global-static-ip-name: ""
-    nginx.ingress.kubernetes.io/secure-backends: "false"
-    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
-    # nginx.ingress.kubernetes.io/whitelist-source-range: 0.0.0.0/0
   path: /
   hosts:
     - minio-console.matrix.local

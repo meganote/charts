@@ -1,0 +1,18 @@
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: spark
+  labels:
+    name: spark
+---
+kind: Secret
+apiVersion: v1
+metadata:
+  name: minio-spark
+  namespace: spark
+  labels:
+    app: spark
+data:
+  accessKey: YzRmOWRmZTEK
+  secretKey: M2NhMWY0MzEK
+type: Opaque

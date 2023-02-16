@@ -1,23 +1,30 @@
-kind: Secret
+kind: Namespace
 apiVersion: v1
 metadata:
   name: minio
-  namespace: meganote
+  labels:
+    name: minio
+---
+kind: Secret
+apiVersion: v1
+metadata:
+  name: console-admin
+  namespace: minio
   labels:
     app: minio
   annotations:
     meta.helm.sh/release-name: minio
     meta.helm.sh/release-namespace: minio
 data:
-  rootUser: OGI2MjJl
-  rootPassword: YTNlN2Q4OGQ0ZmE4
+  rootUser: YzRmOWRmZTEK
+  rootPassword: M2NhMWY0MzEK
 type: Opaque
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: minio
-  namespace: meganote
+  namespace: minio
 spec:
   storageClassName: ""
   accessModes:

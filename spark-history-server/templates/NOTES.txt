@@ -1,0 +1,13 @@
+The Spark History Server has been installed.
+Check its status by running:
+  kubectl --namespace {{ .Release.Namespace }} get pods -l "app.kubernetes.io/instance={{ .Release.Name }}"
+Connect to the Web UI:
+{{- if .Values.ingress.enabled }}
+    # Open in browser:
+    {{- range .Values.ingress.hosts }}
+    #   {{ . }}
+    {{- end }}
+{{- else }}
+    kubectl --namespace {{ .Release.Namespace }} port-forward {{ include "spark-history-server.fullname" . }} 18080
+    # Open in browser: http://localhost:18080
+{{- end }}

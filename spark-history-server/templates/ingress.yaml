@@ -1,0 +1,50 @@
+{{- if .Values.ingress.enabled -}}
+{{- $fullName := include "spark-history-server.fullname" . -}}
+{{- $servicePort := .Values.service.externalPort -}}
+{{- $ingressPath := .Values.ingress.path -}}
+apiVersion: {{ template "spark-history-server.ingress.apiVersion" . }}
+kind: Ingress
+metadata:
+  name: {{ $fullName }}
+  namespace: {{ .Release.Namespace | quote }}
+
+{{- with .Values.ingress.annotations }}
+  annotations:
+{{ toYaml . | indent 4 }}
+{{- end }}
+spec:
+{{- if .Values.ingress.ingressClassName }}
+  ingressClassName: {{ .Values.ingress.ingressClassName }}
+{{- end }}
+{{- if .Values.ingress.tls }}
+  tls:
+  {{- range .Values.ingress.tls }}
+    - hosts:
+      {{- range .hosts }}
+        - {{ . | quote }}
+      {{- end }}
+      secretName: {{ .secretName }}
+  {{- end }}
+{{- end }}
+  rules:
+  {{- range .Values.ingress.hosts }}
+    - http:
+        paths:
+          - path: {{ $ingressPath }}
+          {{- if semverCompare ">=1.19-0" $.Capabilities.KubeVersion.GitVersion }}
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ $fullName }}
+                port:
+                  number: {{ $servicePort }}
+          {{- else }}
+            backend:
+              serviceName: {{ $fullName }}
+              servicePort: {{ $servicePort }}
+          {{- end }}
+      {{- if . }}
+      host: {{ . | quote }}
+      {{- end }}
+  {{- end }}
+{{- end }}

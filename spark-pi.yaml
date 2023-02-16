@@ -20,7 +20,7 @@ apiVersion: "sparkoperator.k8s.io/v1beta2"
 kind: SparkApplication
 metadata:
   name: spark-pi
-  namespace: meganote
+  namespace: spark
 spec:
   type: Scala
   mode: cluster
@@ -34,7 +34,7 @@ spec:
   sparkConf:
     spark.eventLog.enabled: "true"
     spark.eventLog.dir: "s3a://spark/eventLog"
-    spark.hadoop.fs.s3a.endpoint: "http://minio.meganote.svc:9000"
+    spark.hadoop.fs.s3a.endpoint: "http://minio-server.minio.svc:9000"
 #    spark.hadoop.fs.s3a.access.key: "xxx"
 #    spark.hadoop.fs.s3a.secret.key: "xxx"
     spark.hadoop.fs.s3a.fast.upload: "true"
@@ -49,11 +49,11 @@ spec:
     terminationGracePeriodSeconds: 60
     envSecretKeyRefs:
       AWS_ACCESS_KEY_ID:
-        name: minio
-        key: rootUser
+        name: minio-spark
+        key: accessKey
       AWS_SECRET_ACCESS_KEY:
-        name: minio
-        key: rootPassword
+        name: minio-spark
+        key: secretKey
   executor:
     cores: 1
     instances: 1

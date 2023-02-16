@@ -1,0 +1,9 @@
+apiVersion: v2
+appVersion: 3.3.0
+name: spark-history-server
+description: A Helm chart for deploying Spark History Server in Kubernetes
+maintainers:
+  - name: gokasama
+    email: gokasama@github.com
+type: application
+version: 1.0.0

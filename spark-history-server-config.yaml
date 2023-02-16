@@ -1,0 +1,36 @@
+image:
+  repository: glue/sparkui
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: v4.0
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: "spark-history-server"
+
+sparkHistoryOpts: "-Dspark.history.fs.logDirectory=s3a://spark/eventLog/"
+sparkDaemonMemory: 1G
+
+existingSecret: "minio-spark"
+
+sparkConf: |-
+  spark.hadoop.fs.s3a.aws.credentials.provider=org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider
+  spark.history.fs.eventLog.rolling.maxFilesToRetain=5
+  spark.hadoop.fs.s3a.impl=org.apache.hadoop.fs.s3a.S3AFileSystem
+  spark.hadoop.fs.s3a.endpoint=http://minio-server.minio.svc:9000
+  spark.hadoop.fs.s3a.path.style.access=true
+  spark.eventLog.enabled=true
+  spark.history.ui.port=18080
+
+ingress:
+  enabled: true
+  ingressClassName: "nginx"
+#  annotations:
+#    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+#    nginx.ingress.kubernetes.io/rewrite-target: /
+#    nginx.ingress.kubernetes.io/secure-backends: "false"
+#    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+  path: /
+  hosts:
+    - spark-history.matrix.local

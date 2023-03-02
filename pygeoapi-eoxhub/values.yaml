@@ -1,0 +1,66 @@
+existingNfs:
+  enabled: true
+  nfsServer: "fs-67cadc3e.efs.eu-central-1.amazonaws.com"
+  nfsShare: "edc-jupyter-user-pvc-3157bd51-f57d-11e9-adac-062139e27092"
+
+
+extraPvcs: []
+  #- claim_name: ama-jupyter-eox
+  #  mount_path: /home/jovyan/eox
+
+
+defaultImage: "527538141574.dkr.ecr.eu-central-1.amazonaws.com/eurodatacube-jupyter-user:0.24.5"
+allowedImagesRegex: ""
+imagePullSecret: ""
+logOutput: false
+
+s3:
+  enabled: false
+  bucketName: ""
+  secretName: "edc-bucket"
+  s3Url: "https://s3-eu-central-1.amazonaws.com"
+
+jupyterBaseUrl: "https://edc-jupyter.hub.eox.at"
+
+ingressEnabled: true
+# ingressUrl: "foo.example.com"
+
+outputDirectory: "/home/jovyan/job-output"
+
+pygeoapi:
+  # This block concerns the pygeoapi server deployment itself
+  # Other options are intended to affect the job pods
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: hub.jupyter.org/node-purpose
+            operator: In
+            values:
+            - user
+  logLevel: INFO  # "DEBUG" for more verbosity
+
+secrets: []
+autoMountSecrets: False
+
+checkoutGitRepo:
+  enabled: false
+  url: ""
+  secretName: "pygeoapi-git"
+
+# NOTE: this is about the job pod, not the pygeoapi server job
+nodePurposeLabelKey: "hub.eox.at/node-purpose"
+defaultNodePurpose: "c1"
+allowedNodePurposesRegex: ""
+tolerations: []
+# tolerations: [{"key": "hub.eox.at/processing", "operator": "Exists", "effect": "NoSchedule"}]
+
+job:
+  # TODO: move other global values to job (breaking change)
+  runAsUser: null
+  runAsGroup: null
+  customJobSetupScript: null
+
+fargate:
+  allow: false

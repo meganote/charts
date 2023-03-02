@@ -1,0 +1,52 @@
+# Default airflow tag to deploy
+defaultAirflowTag: "2.5.1-extras"
+
+# Airflow version (Used to make some decisions based on Airflow Version being deployed)
+airflowVersion: "2.5.1"
+
+# Airflow executor
+executor: "KubernetesExecutor"
+
+# Fernet key settings
+fernetKey: gIOX5LWo4WaCHiAsb9j6MZ9I-a8tgtc3JT2hVV6zceA=
+
+# Flask secret key for Airflow Webserver: `[webserver] secret_key` in airflow.cfg
+webserverSecretKey: d870963eb9171db3be6c668d6fbb0979
+
+# StatsD settings
+statsd:
+  enabled: false
+
+webserver:
+  env:
+    - name: AIRFLOW__CODE_EDITOR__ENABLED
+      value: "True"
+  extraVolumes:
+    - name: airflow-dags
+      persistentVolumeClaim:
+        claimName: airflow
+  extraVolumeMounts:
+    - name: airflow-dags
+      mountPath: /opt/airflow/dags
+      subPath: dags
+
+dags:
+  persistence:
+    # Enable persistent volume for storing dags
+    enabled: true
+    # Volume size for dags
+    size: 10Gi
+    existingClaim: airflow
+    ## optional subpath for dag volume mount
+    subPath: dags
+
+# Ingress configuration
+ingress:
+  web:
+    enabled: true
+    path: "/"
+    hosts:
+      - name: airflow.matrix.local
+        tls:
+          enabled: true
+    ingressClassName: "nginx"

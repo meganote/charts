@@ -1,0 +1,115 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ include "base.fullname" . }}
+  labels:
+{{ include "base.labels" . | indent 4 }}
+data:
+  local.config.yml: |
+    server:
+        bind:
+            host: 0.0.0.0
+            port: 80
+        url: https://{{ include "base.ingressUrl" . }}
+        mimetype: application/json; charset=UTF-8
+        encoding: utf-8
+        language: en-US
+        # cors: true
+        pretty_print: true
+        limit: 10
+        map:
+            url: https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}.png
+            attribution: '<a href="https://wikimediafoundation.org/wiki/Maps_Terms_of_Use">Wikimedia maps</a> | Map data &copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap contributors</a>'
+        # ogc_schemas_location: /opt/schemas.opengis.net
+
+        manager:
+            name: pygeoapi_kubernetes_papermill.KubernetesManager
+
+    logging:
+        level: {{ .Values.pygeoapi.logLevel }}
+        #logfile: /tmp/pygeoapi.log
+
+    metadata:
+        identification:
+            title: "{{ .Release.Name }}"
+            description: pygeoapi provides an API to geospatial processing on EOxHub
+            keywords:
+                - geospatial
+                - data
+                - api
+                - processing
+            keywords_type: theme
+            terms_of_service: https://creativecommons.org/licenses/by/4.0/
+            url: https://eurodatacube.com/dashboard
+        license:
+            name: CC-BY 4.0 license
+            url: https://creativecommons.org/licenses/by/4.0/
+        provider:
+            name: EOX
+            url: https://eox.at
+        contact:
+            name: EOX
+            position: Provider
+            address: Thurngasse 8/4
+            city: Wien
+            stateorprovince: Vienna
+            postalcode: 1090
+            country: Österreich / Austria
+            phone: +43 664 6207655
+            fax: null
+            email: hub@eox.at
+            url: https://eurodatacube.com/support
+            hours: null
+            instructions: null
+            role: pointOfContact
+
+    resources:
+      execute-notebook:
+        type: process
+        processor:
+          name: pygeoapi_kubernetes_papermill.PapermillNotebookKubernetesProcessor
+          default_image: "{{ .Values.defaultImage }}"
+          allowed_images_regex: "{{ .Values.allowedImagesRegex }}"
+          image_pull_secret: "{{ .Values.imagePullSecret }}"
+          {{ if .Values.s3.enabled }}
+          s3:
+            bucket_name: "{{ .Values.s3.bucketName }}"
+            secret_name: "{{ .Values.s3.secretName }}"
+            s3_url: "{{ .Values.s3.s3Url }}"
+          {{ end }}
+          output_directory: "{{ .Values.outputDirectory }}"
+          home_volume_claim_name: "{{ if .Values.existingNfs.enabled }}user-{{ .Release.Name }}{{ end }}"
+          {{ if empty .Values.extraPvcs }}
+          extra_pvcs: []
+          {{ else }}
+          extra_pvcs:
+            {{- toYaml .Values.extraPvcs | nindent 10 }}
+          {{ end }}
+          jupyter_base_url: "{{ .Values.jupyterBaseUrl }}"
+          {{ if empty .Values.secrets }}
+          secrets: []
+          {{ else }}
+          secrets:
+            {{- toYaml .Values.secrets | nindent 10 }}
+          {{ end }}
+          auto_mount_secrets: {{ .Values.autoMountSecrets }}
+          {{ if .Values.checkoutGitRepo.enabled }}
+          checkout_git_repo:
+            url: "{{ .Values.checkoutGitRepo.url }}"
+            secret_name: "{{ .Values.checkoutGitRepo.secretName }}"
+          {{ end }}
+          log_output: {{ .Values.logOutput }}
+          default_node_purpose: {{ .Values.defaultNodePurpose }}
+          allowed_node_purposes_regex: {{ .Values.allowedNodePurposesRegex }}
+          {{ if empty .Values.tolerations }}
+          tolerations: []
+          {{ else }}
+          tolerations:
+{{ toYaml .Values.tolerations  | indent 10}}
+          {{ end }}
+          job_service_account: {{ include "base.fullname" . }}-job
+          allow_fargate: {{ .Values.fargate.allow }}
+          node_purpose_label_key: {{ .Values.nodePurposeLabelKey }}
+          run_as_user: {{ .Values.job.runAsUser }}
+          run_as_group: {{ .Values.job.runAsGroup }}
+          custom_job_setup_script: {{ .Values.job.customJobSetupScript | quote }}

@@ -1,0 +1,17 @@
+controller:
+  image:
+    registry: registry.k8s.io
+    image: ingress-nginx/controller
+    ## for backwards compatibility consider setting the full image url via the repository value below
+    ## use *either* current default registry/image or repository format or installing chart by providing the values.yaml will fail
+    ## repository:
+    tag: "v1.6.4"
+    digest: 
+    digestChroot: 
+  admissionWebhooks:
+    patch:
+      image:
+        registry: registry.k8s.io
+        image: ingress-nginx/kube-webhook-certgen
+        tag: v20220916-gd32f8c343
+        digest: 

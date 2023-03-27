@@ -16,3 +16,31 @@ data:
   accessKey: YzRmOWRmZTEK
   secretKey: M2NhMWY0MzEK
 type: Opaque
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pvc-desktop-host-d-spark
+  labels:
+    pv-name: pvc-desktop-host-d-spark
+spec:
+  capacity:
+    storage: 500Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: "/run/desktop/mnt/host/d/sharestorage/spark"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: spark
+  namespace: spark
+spec:
+  storageClassName: ""
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 10Gi
+  volumeName: "pvc-desktop-host-d-spark"

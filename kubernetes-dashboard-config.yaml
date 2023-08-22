@@ -21,4 +21,4 @@ ingress:
     - /
 
   hosts:
-    - dashboard.k8s-master
+    - dashboard.matrix.local

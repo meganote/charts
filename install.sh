@@ -1,3 +1,6 @@
+# install ingress-nginx
+helm upgrade --cleanup-on-fail --install ingress-nginx ingress-nginx/ingress-nginx -n ingress-nginx --create-namespace --set controller.image.digest="",controller.admissionWebhooks.patch.image.digest=""
+
 # Install kubernetes-dashboard
 helm upgrade --cleanup-on-fail --install kubernetes-dashboard ./kubernetes-dashboard -n kubernetes-dashboard --create-namespace --values ./kubernetes-dashboard-config.yaml
 kubectl create -f dashboard.yaml
